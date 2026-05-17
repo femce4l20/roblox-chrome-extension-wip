@@ -1,11 +1,6 @@
-// =====================================================
-// ROBLOX TWEAKER
-// =====================================================
-console.log("[Roblox Tweaker] Loaded");
+console.log("[Cvtmvtts Tweaker] Loaded");
 
-// =====================================================
 // HELPERS
-// =====================================================
 
 function normalizeText(text) {
     return (text || "").toLowerCase().replace(/\s+/g, " ").trim();
@@ -20,9 +15,7 @@ function findButtonByLabel(container, labels) {
     }) || null;
 }
 
-// =====================================================
 // CAROUSEL ORDER FIX
-// =====================================================
 
 function enforceCarouselOrder() {
     const friend = document.querySelector(".friend-carousel-container");
@@ -32,12 +25,10 @@ function enforceCarouselOrder() {
     if (!parent) return;
     if (friend.nextElementSibling === game) return;
     friend.insertAdjacentElement("afterend", game);
-    console.log("[Roblox Tweaker] Fixed carousel order");
+    console.log("[Cvtmvtts Tweaker] Fixed carousel order");
 }
 
-// =====================================================
 // CATALOG: CLASSIC CLOTHING ABOVE 3D CLOTHING
-// =====================================================
 
 function enforceClassicClothingOrder() {
     const container = document.querySelector("#catalog-content .filter-options-container");
@@ -67,12 +58,10 @@ function enforceClassicClothingOrder() {
         container.insertBefore(btn, shirtBtn);
     }
 
-    console.log("[Roblox Tweaker] Moved Classic Clothing above 3D Clothing");
+    console.log("[Cvtmvtts Tweaker] Moved Classic Clothing above 3D Clothing");
 }
 
-// =====================================================
 // TEXT REPLACEMENT
-// =====================================================
 
 function replaceTextInNode(node) {
     if (node.nodeType === Node.TEXT_NODE) {
@@ -96,9 +85,7 @@ function applyTextReplacements() {
     replaceTextInNode(document.body);
 }
 
-// =====================================================
 // APPLY ALL MODIFICATIONS
-// =====================================================
 
 function applyTweaks() {
     enforceCarouselOrder();
@@ -107,16 +94,12 @@ function applyTweaks() {
     applyTextReplacements();
 }
 
-// =====================================================
 // INITIAL RUN
-// =====================================================
 
 applyTweaks();
 
-// =====================================================
 // OBSERVER
 // Roblox constantly updates dynamically
-// =====================================================
 
 let scheduled = false;
 
