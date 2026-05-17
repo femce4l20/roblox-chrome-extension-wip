@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Test",
+  "name": "Cvtmvtts Tweaker",
   "version": "1.0",
-  "description": "Test",
+  "description": "Tweaks for various websites (just roblox rn :/)",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["https://www.roblox.com/*"],
   "action": {
