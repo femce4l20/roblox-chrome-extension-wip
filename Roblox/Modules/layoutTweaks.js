@@ -77,7 +77,10 @@
             const replacements = {
                 "Charts": "Games",
                 "Roblox Plus": "Premium",
-                "Marketplace": "Catalog"
+                "Marketplace": "Catalog",
+                "Create": "Develop",
+                "Chat": "Party",
+                "Communities": "Groups"
             };
 
             for (const [find, replace] of Object.entries(replacements)) {
