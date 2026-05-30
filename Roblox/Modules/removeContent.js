@@ -1,83 +1,213 @@
 // =====================================================
-// REMOVE CONTENT MODULE
-
-// This module:
-// - Removes the "Makeup" filter from the Catalog search sidebar and tab from the Avatar Editor.
-// - Uses a MutationObserver to watch for dynamic UI changes and re-apply removals as needed.
+// CVTMVTTS TWEAKER - REMOVE CONTENT MODULE
+//
+// Removes unwanted UI elements and updates the Home heading.
+// Controlled by settings toggles.
 // =====================================================
 
-function normalizeText(text) {
-    return (text || "").toLowerCase().replace(/\s+/g, " ").trim();
-}
+(function () {
+    const shared = window.CvtmvttsTweaker?.shared;
+    if (!shared) return;
 
-// CATALOG: REMOVE MAKEUP FILTER
+    const { log, normalizeText, createScheduler, onReady } = shared;
 
-function removeMakeupFilter() {
-    const container = document.querySelector("#catalog-content .filter-options-container");
-    if (!container) return;
+    let contentObserverStarted = false;
 
-    const buttons = container.querySelectorAll("button");
+    // =====================================================
+    // CATALOG: REMOVE MAKEUP FILTER
+    // =====================================================
 
-    for (const btn of buttons) {
-        const span = btn.querySelector(".filter-option-name");
-        const text = normalizeText(span ? span.textContent : btn.textContent);
-        const aria = normalizeText(btn.getAttribute("aria-label"));
+    function removeMakeupFilter() {
+        const container = document.querySelector("#catalog-content .filter-options-container");
+        if (!container) return;
 
-        const isMakeup =
-            text === "makeup" ||
-            aria.includes("makeup");
+        const buttons = container.querySelectorAll("button");
 
-        if (isMakeup) {
-            btn.remove();
-            console.log("[Cvtmvtts Tweaker] Removed Makeup filter");
+        for (const btn of buttons) {
+            const span = btn.querySelector(".filter-option-name");
+            const text = normalizeText(span ? span.textContent : btn.textContent);
+            const aria = normalizeText(btn.getAttribute("aria-label"));
+
+            const isMakeup = text === "makeup" || aria.includes("makeup");
+
+            if (isMakeup) {
+                btn.remove();
+                log("Removed Makeup filter");
+            }
         }
     }
-}
 
-// AVATAR EDITOR: REMOVE MAKEUP CATEGORY
+    // =====================================================
+    // AVATAR EDITOR: REMOVE MAKEUP CATEGORY
+    // =====================================================
 
-function removeMakeupCategory() {
-    // Use the actual ID directly so the dot in the ID does not cause selector issues.
-    const makeupButton =
-        document.getElementById("label.makeup-dropdown") ||
-        document.querySelector('[id="label.makeup-dropdown"]');
+    function removeMakeupCategory() {
+        const makeupButton =
+            document.getElementById("label.makeup-dropdown") ||
+            document.querySelector('[id="label.makeup-dropdown"]');
 
-    if (!makeupButton) return;
+        if (!makeupButton) return;
 
-    const tabItem = makeupButton.closest("li.rbx-tab") || makeupButton.closest("li");
-    if (!tabItem) return;
+        const tabItem = makeupButton.closest("li.rbx-tab") || makeupButton.closest("li");
+        if (!tabItem) return;
 
-    tabItem.remove();
-    console.log("[Cvtmvtts Tweaker] Removed Makeup category tab");
-}
+        tabItem.remove();
+        log("Removed Makeup category tab");
+    }
 
-// RUN / WATCH FOR DYNAMIC UI
+    // =====================================================
+    // NAVBAR: REMOVE DOWNLOAD APP ITEM
+    // =====================================================
 
-let makeupObserverStarted = false;
+    function removeDownloadAppItem() {
+        const item = document.querySelector(
+            "#right-navigation-header > div.navbar-right.rbx-navbar-right > ul > li.navbar-icon-item.navbar-download-app-item"
+        );
 
-function removeMakeupContent() {
-    removeMakeupFilter();
-    removeMakeupCategory();
-}
+        if (!item) return;
 
-function startMakeupObserver() {
-    if (makeupObserverStarted) return;
-    makeupObserverStarted = true;
+        item.remove();
+        log("Removed Download App item");
+    }
 
-    removeMakeupContent();
+    // =====================================================
+    // ITEM PAGE: REMOVE TIMED OPTIONS CONTAINER
+    // =====================================================
 
-    const observer = new MutationObserver(() => {
-        removeMakeupContent();
-    });
+    function removeTimedOptionsContainer() {
+        const container = document.querySelector(
+            "#item-details > div.price-row-container > div > div.clearfix.item-info-row-container.timed-options-row-container > span > div.timed-options-container"
+        );
 
-    observer.observe(document.documentElement, {
-        childList: true,
-        subtree: true
-    });
-}
+        if (!container) return;
 
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", startMakeupObserver);
-} else {
-    startMakeupObserver();
-}
+        container.remove();
+        log("Removed timed options container");
+    }
+
+    // =====================================================
+    // ITEM PAGE: REMOVE EXTRA DETAIL SECTION
+    // =====================================================
+
+    function removeItemDetailSection() {
+        const section = document.querySelector("#item-details > div:nth-child(8)");
+
+        if (!section) return;
+
+        section.remove();
+        log("Removed item-details nth-child(8) section");
+    }
+
+    // =====================================================
+    // CATALOG PAGE: REMOVE SPONSORED CATALOG ITEMS
+    // =====================================================
+
+    function removeSponsoredCatalogItems() {
+        const sponsored = document.querySelector("#sponsored-catalog-items");
+
+        if (!sponsored) return;
+
+        sponsored.remove();
+        log("Removed sponsored catalog items");
+    }
+
+    // =====================================================
+    // HOME PAGE: WELCOME HEADING
+    // =====================================================
+
+    function getLoggedInUsername() {
+        const possibleSources = [
+            window.Roblox?.CurrentUser?.name,
+            window.Roblox?.CurrentUser?.username,
+            document.querySelector('meta[name="user-name"]')?.content,
+            document.querySelector('meta[name="username"]')?.content,
+            document.querySelector('meta[property="rbx:username"]')?.content
+        ];
+
+        for (const source of possibleSources) {
+            const value = (source || "").toString().trim();
+            if (value) return value;
+        }
+
+        const anchors = Array.from(document.querySelectorAll('a[href*="/users/"]'));
+
+        for (const a of anchors) {
+            const text = (a.textContent || "").trim();
+            if (text && text.length <= 20) {
+                return text;
+            }
+        }
+
+        return "";
+    }
+
+    function capitalizeFirstLetter(text) {
+        if (!text) return text;
+        return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+    }
+
+    function updateHomeHeading() {
+        if (window.location.pathname !== "/home") return;
+
+        const heading = document.querySelector("#HomeContainer > div.section > div > h1");
+        if (!heading) return;
+
+        let username = getLoggedInUsername();
+        if (!username) return;
+
+        username = capitalizeFirstLetter(username);
+
+        const desiredText = `Welcome, ${username}!`;
+
+        if (heading.textContent !== desiredText) {
+            heading.textContent = desiredText;
+            log("Updated Home heading");
+        }
+    }
+
+    // =====================================================
+    // APPLY / WATCHER
+    // =====================================================
+
+    function applyAllChanges() {
+        const settings = window.CvtmvttsTweaker?.getSettings?.() || {};
+
+        if (settings.removeMakeupFilter) removeMakeupFilter();
+        if (settings.removeMakeupCategory) removeMakeupCategory();
+        if (settings.removeDownloadAppItem) removeDownloadAppItem();
+        if (settings.removeTimedOptionsContainer) removeTimedOptionsContainer();
+        if (settings.removeItemDetailSection) removeItemDetailSection();
+        if (settings.removeSponsoredCatalogItems) removeSponsoredCatalogItems();
+        if (settings.updateHomeHeading) updateHomeHeading();
+    }
+
+    function startContentObserver() {
+        if (contentObserverStarted) return;
+        contentObserverStarted = true;
+
+        applyAllChanges();
+
+        const scheduleUpdate = createScheduler(applyAllChanges);
+        const observer = new MutationObserver(scheduleUpdate);
+
+        observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    window.CvtmvttsTweaker = window.CvtmvttsTweaker || {};
+    window.CvtmvttsTweaker.modules = window.CvtmvttsTweaker.modules || {};
+    window.CvtmvttsTweaker.modules.removeContent = {
+        removeMakeupFilter,
+        removeMakeupCategory,
+        removeDownloadAppItem,
+        removeTimedOptionsContainer,
+        removeItemDetailSection,
+        removeSponsoredCatalogItems,
+        updateHomeHeading,
+        applyAllChanges
+    };
+
+    onReady(startContentObserver);
+})();
